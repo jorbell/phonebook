@@ -3,9 +3,22 @@ const morgan = require('morgan')
 const app = express()
 
 app.use(express.json())
-app.use(morgan('tiny'))
 
-
+//app.use(morgan(':method :url :status :res[content-length] - :response-time ms'))
+morgan.token('body', req => {
+	return JSON.stringify(req.body)
+})
+app.use(morgan(function (tokens, req, res) {
+	//console.log(req.body)
+  return [
+    tokens.method(req, res),
+    tokens.url(req, res),
+    tokens.status(req, res),
+    tokens.res(req, res, 'content-length'), '-',
+    tokens['response-time'](req, res), 'ms',
+		tokens.body(req)
+  ].join(' ')
+}))
 let persons = 
 	[
     {
@@ -34,12 +47,12 @@ app.get('/info', (req,res) => {
 
 	let reply = `<p>Phonebook has info for ${persons.length} people</p>`
 	reply += `<p>${Date(Date.now).toString()} </p>`
-	console.log(req)
+	//console.log(req)
 	res.send(reply)
 	//res.send('<p></p>')
 })
 app.get('/api/persons', (req,res) => {
-	console.log(persons)
+	//console.log(persons)
 	res.json(persons)
 })
 
